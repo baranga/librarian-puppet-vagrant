@@ -46,7 +46,12 @@ if [ "${FOUND_YUM}" -eq '0' ]; then
 
 elif [ "${FOUND_APT}" -eq '0' ]; then
 
-  apt-get -q -y update
+  # run apt-get update once a week
+  STAMPFILE="/var/lib/apt/periodic/update-success-stamp"
+  if [ ! -f "${STAMPFILE}" -o $(stat -c %Y "${STAMPFILE}") -le $(date -d 'last week' +%s) ]; then
+    apt-get -q -y update
+  fi
+  unset STAMPFILE;
 
   # Make sure Git is installed
   if [ "$FOUND_GIT" -ne '0' ]; then
